@@ -63,7 +63,7 @@ vulnscan-agent/
 要求：**Node.js >= 20**（使用内置 `fetch` 与 `AbortSignal.timeout`）。
 
 ```bash
-git clone <this-repo>
+git clone https://github.com/chenke0820/vulnscan-agent.git
 cd vulnscan-agent
 ```
 
@@ -173,7 +173,7 @@ curl -X POST http://127.0.0.1:7788/api/sqli \
 
 ## 报告
 
-`reports/` 下会生成 Markdown 报告，结构为「概述 → 漏洞清单（按严重性排序）→ 结论 → 附加章节」，包含证据与修复建议。
+`reports/` 下会生成 Markdown 报告，结构为「概述 → 漏洞清单（按严重性排序）→ 结论 → 附加章节」，包含证据与修复建议。生成的示例见 [docs/sample-report.md](docs/sample-report.md)。
 
 ```markdown
 | 序号 | 严重性 | 漏洞名称 | 证据 | 修复建议 |

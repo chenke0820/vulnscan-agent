@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>VulnScan Console · Web 漏洞扫描智能体</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l8 3.5V12c0 5-3.3 8.9-8 10.5C7.3 20.9 4 17 4 12V5.5L12 2z' fill='%230d1628' stroke='%2322d3ee' stroke-width='1.5'/%3E%3Cpath d='M8.5 12l2.4 2.4 4.6-4.8' fill='none' stroke='%23a3e635' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="backdrop" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3l7 3v5.5c0 4.4-2.9 7.9-7 9.5-4.1-1.6-7-5.1-7-9.5V6l7-3z"/>
+          <path d="M8.8 12.2l2.1 2.1 4.3-4.4"/>
+        </svg>
+      </span>
+      <div class="brand-text">
+        <h1>VulnScan <span>Console</span></h1>
+        <p>Web 漏洞扫描智能体 · MCP + Web</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span class="health" id="healthPill">
+        <i class="dot"></i><span id="healthText">正在检测后端…</span>
+      </span>
+      <span class="version">v1.0.0</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero panel">
+      <div class="hero-copy">
+        <span class="eyebrow">AUTHORIZED SECURITY TESTING</span>
+        <h2>输入目标，开始一次只读体检</h2>
+        <p>安全响应头、敏感路径、SQL 注入与反射型 XSS 四路探测，结果可直接生成报告。</p>
+      </div>
+
+      <form class="target-bar" id="scanForm" novalidate>
+        <span class="target-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+            <circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>
+          </svg>
+        </span>
+        <label class="sr-only" for="targetInput">扫描目标地址</label>
+        <input id="targetInput" type="text" inputmode="url" spellcheck="false" autocomplete="off"
+               placeholder="http://127.0.0.1:8099/login?name=guest">
+        <button class="btn primary" id="scanBtn" type="submit">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="btn-label">综合扫描</span>
+        </button>
+      </form>
+
+      <div class="actions" role="group" aria-label="扫描类型">
+        <button class="action" type="button" data-action="scan">
+          <span class="action-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 6h16M4 12h16M4 18h10"/>
+            </svg>
+          </span>
+          <span class="action-body"><strong>综合扫描</strong><small>响应头 · 敏感路径 · 指纹</small></span>
+        </button>
+        <button class="action" type="button" data-action="sqli">
+          <span class="action-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>
+            </svg>
+          </span>
+          <span class="action-body"><strong>SQL 注入</strong><small>报错型 + 布尔型</small></span>
+        </button>
+        <button class="action" type="button" data-action="xss">
+          <span class="action-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/>
+            </svg>
+          </span>
+          <span class="action-body"><strong>反射型 XSS</strong><small>载荷回显检测</small></span>
+        </button>
+        <button class="action" type="button" data-action="probe">
+          <span class="action-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12h4l2.5-6 4 12 2.5-6h5"/>
+            </svg>
+          </span>
+          <span class="action-body"><strong>HTTP 基线</strong><small>状态码 · 响应头</small></span>
+        </button>
+      </div>
+
+      <p class="hint">
+        仅对已获得授权的目标测试 · 本地演示靶场
+        <code>http://127.0.0.1:8099</code>
+      </p>
+    </section>
+
+    <div class="layout">
+      <section class="results" aria-live="polite">
+        <div class="panel empty" id="emptyState">
+          <div class="radar" aria-hidden="true">
+            <svg viewBox="0 0 200 200">
+              <circle cx="100" cy="100" r="86"/><circle cx="100" cy="100" r="62"/><circle cx="100" cy="100" r="38"/>
+              <path d="M100 14v172M14 100h172"/>
+              <path class="sweep" d="M100 100 L100 14 A86 86 0 0 1 186 100 Z"/>
+              <circle class="blip" cx="140" cy="66" r="4"/>
+            </svg>
+          </div>
+          <h3>等待目标</h3>
+          <p>填写上方地址并选择扫描类型，探测结果会实时展示在这里。</p>
+          <ul class="legend">
+            <li><i class="sev critical"></i>严重</li>
+            <li><i class="sev high"></i>高危</li>
+            <li><i class="sev medium"></i>中危</li>
+            <li><i class="sev low"></i>低危</li>
+            <li><i class="sev info"></i>提示</li>
+          </ul>
+        </div>
+
+        <div class="panel skeleton" id="loadingState" hidden>
+          <div class="scanning-line"><span></span></div>
+          <p class="scanning-text">正在探测目标，请稍候…</p>
+          <div class="sk-row"></div>
+          <div class="sk-row short"></div>
+          <div class="sk-card"></div>
+          <div class="sk-card"></div>
+        </div>
+
+        <div id="resultView" hidden>
+          <div class="panel stats" id="statsRow"></div>
+
+          <div class="panel severity-panel" id="severityPanel">
+            <div class="panel-head">
+              <h3>严重性分布</h3>
+              <span class="muted" id="severityTotal"></span>
+            </div>
+            <div class="severity-bar" id="severityBar"></div>
+            <div class="severity-legend" id="severityLegend"></div>
+          </div>
+
+          <div class="panel findings-panel">
+            <div class="panel-head">
+              <h3>问题清单</h3>
+              <span class="muted" id="findingCount"></span>
+            </div>
+            <div id="findingsList" class="findings"></div>
+          </div>
+
+          <div class="panel extra-panel" id="extraPanel" hidden>
+            <div class="panel-head">
+              <h3 id="extraTitle">详细信息</h3>
+            </div>
+            <div id="extraBody"></div>
+          </div>
+
+          <div class="panel raw-panel">
+            <button class="collapse-btn" id="rawToggle" type="button" aria-expanded="false">
+              <span>原始 JSON</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <pre class="raw" id="rawJson" hidden></pre>
+          </div>
+
+          <div class="result-actions">
+            <button class="btn ghost" id="copyBtn" type="button">复制摘要</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="sidebar">
+        <section class="panel report-card">
+          <div class="panel-head">
+            <h3>生成报告</h3>
+            <span class="tag">md · txt · html</span>
+          </div>
+          <label class="field">
+            <span>报告标题</span>
+            <input id="reportTitle" type="text" placeholder="目标 Web 安全扫描报告">
+          </label>
+          <label class="field">
+            <span>概述</span>
+            <textarea id="reportSummary" rows="3" placeholder="扫描范围与方法…"></textarea>
+          </label>
+          <label class="field">
+            <span>输出格式</span>
+            <select id="reportFormat">
+              <option value="md">Markdown (.md)</option>
+              <option value="txt">纯文本 (.txt)</option>
+              <option value="html">网页 (.html)</option>
+            </select>
+          </label>
+          <button class="btn primary block" id="reportBtn" type="button">
+            <span class="spinner" aria-hidden="true"></span>
+            <span class="btn-label">生成报告</span>
+          </button>
+          <div class="report-result" id="reportResult" hidden></div>
+        </section>
+
+        <section class="panel history-card">
+          <div class="panel-head">
+            <h3>报告历史</h3>
+            <button class="link-btn" id="refreshReports" type="button">刷新</button>
+          </div>
+          <ul class="report-list" id="reportList"></ul>
+          <div class="preview" id="reportPreview" hidden>
+            <div class="preview-head">
+              <span id="previewName"></span>
+              <button class="link-btn" id="closePreview" type="button">收起</button>
+            </div>
+            <pre id="previewBody"></pre>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <footer>
+    <span>vulnscan-agent · MCP 扫描能力 + Web 控制台</span>
+    <span>仅限授权测试</span>
+  </footer>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+  <script src="app.js"></script>
+</body>
+</html>

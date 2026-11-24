@@ -1,0 +1,25 @@
+{
+  "name": "vulnscan-agent",
+  "version": "1.0.0",
+  "description": "Web 漏洞扫描智能体：MCP 工具 + 图形化控制台，零第三方依赖",
+  "type": "module",
+  "main": "src/scanner.mjs",
+  "scripts": {
+    "web": "node web/server.mjs",
+    "demo": "node demo/vulnerable-target.mjs",
+    "mcp:vulnscan": "node mcp/vulnscan.mjs",
+    "mcp:report": "node mcp/report.mjs"
+  },
+  "keywords": [
+    "mcp",
+    "security",
+    "vulnerability-scanner",
+    "xss",
+    "sqli",
+    "pi"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}
